@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Link</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="./public/volunteer-management-logo@2x.png"
+    />
+    <link rel="stylesheet" href="./global.css" />
+    <link rel="stylesheet" href="./admin-page.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 50px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #006046;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #045f13;
+        }
+    </style>
+</head>
+<body>
+    <div class="sticky-top">
+        <section class="admin-portal-link">
+            <div class="spotlight-element4">
+                <div class="spotlight-background4"></div>
+                <h1 class="volunteer-link-admin">Create Account</h1>
+            </div>
+        </section>
+    <div class="container">
+        <form id="createAccountForm" action="http://localhost:8080/register" method="post">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <select id="role" name="role" required>
+                    <option value="volunteer">Volunteer</option>
+                    <option value="Event Organizer">Event Organizer</option>
+                </select>
+            </div>
+            <button type="submit">Sign me up!</button>
+        </form>
+    </div>
+    <div id="errorBox" style="color: red; display: none;"></div>
+<div id="additionalInfo" style="display: none;">
+    <!-- Additional fields for event organizers can go here -->
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const createAccountForm = document.getElementById('createAccountForm');
+
+        // Simplify error handling
+        const errorBox = document.getElementById('errorBox');
+        errorBox.innerHTML = ""; // Clear previous errors
+
+        function displayErrors(errors) {
+            errorBox.innerHTML = errors.join('<br>');
+            errorBox.style.display = errors.length ? 'block' : 'none';
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const errors = [];
+
+            // Validate email
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createAccountForm.email.value)) {
+                errors.push("Enter a valid email.");
+                isValid = false;
+            }
+
+            // Validate password
+            if (!/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z\d]).{8,}$/.test(createAccountForm.password.value)) {
+                errors.push("Password must include at least 8 characters, an uppercase letter, a number, and a special character.");
+                isValid = false;
+            }
+
+            // Check if passwords match
+            if (createAccountForm.password.value !== createAccountForm.confirmPassword.value) {
+                errors.push("Passwords do not match.");
+                isValid = false;
+            }
+
+            // Validate first and last name
+            if (!createAccountForm.firstName.value.trim() || !createAccountForm.lastName.value.trim()) {
+                errors.push("First name and last name are required.");
+                isValid = false;
+            }
+
+            if (!isValid) {
+                displayErrors(errors);
+            }
+
+            return isValid;
+        }
+
+        createAccountForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+            if (validateForm()) {
+                this.submit(); // Allow form submission if validation passes
+            }
+        });
+    });
+</script>
+
+
+</body>
+</html>
