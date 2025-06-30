@@ -10,7 +10,7 @@
       href="./public/volunteer-management-logo@2x.png"
     />
     <link rel="stylesheet" href="./global.css" />
-    <link rel="stylesheet" href="./admin-page.css" />
+    
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -119,8 +119,22 @@
 <div id="additionalInfo" style="display: none;">
     <!-- Additional fields for event organizers can go here -->
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+        //initialize Supabase client
+        const SUPABASE_URL = 'https://ijpoxebmknbkcjlajbnm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqcG94ZWJta25ia2NqbGFqYm5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3ODg2MzYsImV4cCI6MjA2NjM2NDYzNn0.beqj5aXJY812TXvwGeTgLEeJHGsdKn_ueS6L5YH6gG4';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        supabase.auth.getSession().then(({ data, error }) => {
+          if (error) {
+            console.error("Error connecting to Supabase:", error.message);
+          } else {
+            console.log("✅ Supabase is connected!", data);
+          }
+        });
+
         const createAccountForm = document.getElementById('createAccountForm');
 
         // Simplify error handling
@@ -167,13 +181,31 @@
             return isValid;
         }
 
-        createAccountForm.addEventListener('submit', function(event) {
+        createAccountForm.addEventListener('submit', async function(event) {
             event.preventDefault(); // Prevent the form from submitting normally
             if (validateForm()) {
-                this.submit(); // Allow form submission if validation passes
+                // Supabase sign up
+                const { data, error } = await supabase.auth.signUp({
+                    email: createAccountForm.email.value.trim(),
+                    password: createAccountForm.password.value,
+                    options: {
+                        data: { displayName: createAccountForm.firstName.value.trim() + ' ' + createAccountForm.lastName.value.trim() + ', ' + createAccountForm.role.value },
+                    }          
+                });
+
+                if (error) {
+                    errorBox.textContent = error.message;
+                    errorBox.style.display = "block";
+                } 
+                else {
+                    errorBox.style.display = "none";
+                    alert("Successful account creation! Please check your email for verification.");
+                    window.location.href = "./login-page.html";
+                }
             }
         });
     });
+
 </script>
 
 
