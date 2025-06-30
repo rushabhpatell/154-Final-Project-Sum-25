@@ -80,12 +80,28 @@
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        //initialize Supabase
+        const SUPABASE_URL = 'https://ijpoxebmknbkcjlajbnm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqcG94ZWJta25ia2NqbGFqYm5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3ODg2MzYsImV4cCI6MjA2NjM2NDYzNn0.beqj5aXJY812TXvwGeTgLEeJHGsdKn_ueS6L5YH6gG4';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+        supabase.auth.getSession().then(({ data, error }) => {
+          if (error) {
+            console.error("Error connecting to Supabase:", error.message);
+          } else {
+            console.log("✅ Supabase is connected!", data);
+          }
+        });
+
+        
         var loginForm = document.querySelector("form.component-1");
         var emailInput = document.getElementById("email");
         var passwordInput = document.getElementById("password");
-        var submitButton = document.querySelector("input[type=submit]");
+        var submitButton = document.querySelector("button[type=submit]");
         var errorMessage = document.createElement("div");
         var errorList = document.createElement("ul");
 
@@ -145,15 +161,66 @@
           // }
           return true;
         }
-
-        loginForm.addEventListener("submit", function (event) {
+        // Add event listener to the login form, async function
+        loginForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          
           var isemailValid = checkemail();
           var isPasswordValid = checkPassword();
 
           if (!isemailValid || !isPasswordValid) {
-            event.preventDefault(); // Stop the form from submitting
+            event.preventDefault(); // Stop the form from submitting on failed validation
           }
+
+          //call to Supabase to sign in with password
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: emailInput.value.trim(),
+            password: passwordInput.value
+          });
+
+          if (signInError) {
+            displayError(emailInput, signInError.message);
+            return;
+          }
+
+          // Check for email verification because email verification is needed for enrollment in MFA
+          const user = signInData?.user;
+          if (!user || !user.email_confirmed_at) {
+            alert("Please verify your email address.");
+            await supabase.auth.signOut();
+            return;
+          }
+          
+            // Check if user has enrolled MFA factors
+          const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+          if (factorsError) {
+            alert("Error checking MFA status: " + factorsError.message);
+            return;
+          }
+          //get enrollment factors to check if the user is enrolled in MFA or not
+          const enrolledFactors = factorsData?.all ?? [];
+          if (enrolledFactors.length === 0) {
+            // Not yet enrolled to MFA, so go to enrollment page
+            window.location.href = "./2FA Page.html";
+          } else {
+            // MFA already enrolled so proceed to 2FA page and start challenge
+            const factorId = enrolledFactors[0].id; // Use the first factor for challenge
+            //Start the MFA challenge
+            const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({ factorId });
+            if (challengeError) {
+              alert("Error starting MFA challenge: " + challengeError.message);
+              return;
+            }
+            // Store factorId and challengeId in sessionStorage for use in 2FA-Verification.html
+            sessionStorage.setItem('mfa_factor_id', factorId);
+            sessionStorage.setItem('mfa_challenge_id', challengeData.id);
+            
+            // Redirect to 2FA to complete challenge and verification
+            window.location.href = "./2FA-Verification.html";
+          }
+          
         });
+        
 
         emailInput.addEventListener("input", function () {
           if (validateInput(emailInput)) {
@@ -210,24 +277,10 @@
           window.location.href = "./admin-page.html";
         });
       }
+      
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const SUPABASE_URL = 'https://ijpoxebmknbkcjlajbnm.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqcG94ZWJta25ia2NqbGFqYm5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3ODg2MzYsImV4cCI6MjA2NjM2NDYzNn0.beqj5aXJY812TXvwGeTgLEeJHGsdKn_ueS6L5YH6gG4';
+    
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        supabase.auth.getSession().then(({ data, error }) => {
-          if (error) {
-            console.error("Error connecting to Supabase:", error.message);
-          } else {
-            console.log("✅ Supabase is connected!", data);
-          }
-        });
-      });
-    </script>
 
   </body>
 </html>

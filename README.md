@@ -2,4 +2,5 @@
 
 Members:
 Rushabh Patel
-...
+Anjoe Mateo
+Phat Doan
