@@ -97,21 +97,6 @@
                 <label for="password">Confirm Password:</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" required>
             </div>
-            <div class="form-group">
-                <label for="firstName">First Name:</label>
-                <input type="text" id="firstName" name="firstName" required>
-            </div>
-            <div class="form-group">
-                <label for="lastName">Last Name:</label>
-                <input type="text" id="lastName" name="lastName" required>
-            </div>
-            <div class="form-group">
-                <label for="role">Role:</label>
-                <select id="role" name="role" required>
-                    <option value="volunteer">Volunteer</option>
-                    <option value="Event Organizer">Event Organizer</option>
-                </select>
-            </div>
             <button type="submit">Sign me up!</button>
         </form>
     </div>
@@ -168,12 +153,6 @@
                 isValid = false;
             }
 
-            // Validate first and last name
-            if (!createAccountForm.firstName.value.trim() || !createAccountForm.lastName.value.trim()) {
-                errors.push("First name and last name are required.");
-                isValid = false;
-            }
-
             if (!isValid) {
                 displayErrors(errors);
             }
@@ -187,10 +166,7 @@
                 // Supabase sign up
                 const { data, error } = await supabase.auth.signUp({
                     email: createAccountForm.email.value.trim(),
-                    password: createAccountForm.password.value,
-                    options: {
-                        data: { displayName: createAccountForm.firstName.value.trim() + ' ' + createAccountForm.lastName.value.trim() + ', ' + createAccountForm.role.value },
-                    }          
+                    password: createAccountForm.password.value
                 });
 
                 if (error) {
@@ -205,9 +181,6 @@
             }
         });
     });
-
 </script>
-
-
 </body>
 </html>
