@@ -33,11 +33,25 @@
             <h1>Welcome!</h1>
             <p>Congratulations, you have successfully logged in.</p>
           </div>
-          <button onclick="window.location.href='login-page.html'" class="logout-btn">
+          <button id="logout-btn" class="logout-btn">
             Log Out
           </button>
         </div>
       </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      // Initialize Supabase
+      const SUPABASE_URL = 'https://ijpoxebmknbkcjlajbnm.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqcG94ZWJta25ia2NqbGFqYm5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3ODg2MzYsImV4cCI6MjA2NjM2NDYzNn0.beqj5aXJY812TXvwGeTgLEeJHGsdKn_ueS6L5YH6gG4';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // Button for logging out the user
+      document.getElementById('logout-btn').addEventListener('click', async function(e) {
+        e.preventDefault();
+        await supabase.auth.signOut(); // Sign out from Supabase
+        sessionStorage.removeItem('mfa_factor_id'); // Clear factor ID
+        window.location.href = './login-page.html'; //redirect to login page
+      });
+    </script>
   </body>
 </html>
